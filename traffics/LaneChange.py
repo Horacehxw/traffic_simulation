@@ -1,4 +1,4 @@
-from traffics.Constants import *
+from Constants import *
 import numpy as np
 
 from Moveable import Moveable
@@ -29,7 +29,7 @@ class LaneChange():
     RIGHT = 1
 
     '''
-    def __init__(self, p, db, gap_min=MAIN_SMIN, bsave=MAIN_BSAVE, bias_right=0):
+    def __init__(self, p, db, gap_min=MAIN_SMIN, bsave=MAIN_BSAVE_CAR, bias_right=0):
         '''
         :param p: politeness factor
         :param db: change lane incentive penalty

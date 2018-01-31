@@ -13,68 +13,70 @@ Moveable represents a general vehicle object with position, velocity eyc. In
 '''
 
 class Moveable(Interface):
-    def set_position(self, x):
-        pass
-
-    def set_velocity(self, v):
-        pass
-
-    def set_lane(self, lane):
-        pass
-
-    def set_model(self, model):
-        pass
-
-    def set_lane_change(self, lane_change):
-        pass
-
-    def set_length(self, length):
-        pass
-
-    # def set_color(self, color):
-    #     pass
-
-    def position(self):
-        '''
-        :return: meters from start of road
-        '''
-        pass
-
-    def velocity(self):
-        '''
-        :return: m/s
-        '''
-        pass
-
-    def lane(self):
-        pass
-
-    # def color(self):
-    #     pass
-
-    def length(self):
-        pass
-
-    def model(self):
-        pass
-
-    def change(self, f_old, b_old, f_new, b_new):
-        pass
 
     def time_to_change(self, dt):
         pass
 
-    def translate(self, fwd):
+    def translate(self, dt):
         pass
 
-    def accelerate(self, dt, fwd):
+    def accelerate(self, dt, fwd=None):
         pass
 
-    def acceleration(self):
+    def acceleration(self, fwd=None):
         pass
 
-    def acceleration(self, fwd):
+    def distance_to(self, fwd):
+        '''
+        return fwd.pos - self.pos - self.length
+        '''
         pass
 
-    def distance_to(self, other):
+    def change(self, f_old, b_old, f_new, b_new):
         pass
+    #################### not Pythonic way to do this ####################
+    ### use the @property instead for getter and setter
+    # def set_position(self, x):
+    #     pass
+    #
+    # def set_velocity(self, v):
+    #     pass
+    #
+    # def set_lane(self, lane):
+    #     pass
+    #
+    # def set_model(self, model):
+    #     pass
+    #
+    # def set_lane_change(self, lane_change):
+    #     pass
+    #
+    # def set_length(self, length):
+    #     pass
+    #
+    # # def set_color(self, color):
+    # #     pass
+    #
+    # def position(self):
+    #     '''
+    #     :return: meters from start of road
+    #     '''
+    #     pass
+    #
+    # def velocity(self):
+    #     '''
+    #     :return: m/s
+    #     '''
+    #     pass
+    #
+    # def lane(self):
+    #     pass
+    #
+    # # def color(self):
+    # #     pass
+    #
+    # def length(self):
+    #     pass
+    #
+    # def model(self):
+    #     pass

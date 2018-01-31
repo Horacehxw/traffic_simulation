@@ -3,8 +3,6 @@ import numpy as np
 from Moveable import Moveable
 from Constants import *
 
-from Cars import Car, BCCar, Obstcle
-
 '''
 Basis classes for the microscopic traffic model IDM (intelligent-driver model,
  * see <a href="http://xxx.uni-augsburg.de/abs/cond-mat/0002177"> M. Treiber, A.
@@ -35,7 +33,7 @@ class IDM():
     # ismax specify the distance where
     ismax = 100 # ve(s) = ve(ismax) if s > ismax
 
-    def __init__(self, v0, a, b, s0, T):
+    def __init__(self, v0, a, b, s0=2, T=1.5):
         '''
 
         :param v0:
@@ -46,10 +44,11 @@ class IDM():
             max acceleration m/s^2
         :param b:
             normal deceleration m/s^2
-        :param s0:
+        :param s0: default 2
             least safe distance between two cars
             --> exceed this means need to brake immediately
-        :param T:
+        :param T:  default 1.5
+            human reaction time T for s*
         '''
         self.v0, self.delta, self.a, self.b, self.s0,  \
             self.T = v0, DELTA, a, b, s0, T
@@ -78,7 +77,7 @@ class IDM():
         :param dx: the distance between the current and forward car
         :return: velocity in m/s
         '''
-        s = np.floor(dx)
+        s = int(np.floor(dx))
         V = 0
         if s < 0:
             pass # V=0
@@ -97,9 +96,9 @@ class IDM():
         :param fwd: Moveable, The vehicle in the forward vehicle
         :return: acceleration m/s^2
         '''
-        delta_v = bwd.velocity() - fwd.velocity()
+        delta_v = bwd.vel - fwd.vel
         s = bwd.distance_to(fwd)
-        vel = bwd.velocity()
+        vel = bwd.vel
         s_star_raw = self.s0 + self.s1 * np.sqrt(vel / self.v0) + vel * self.T\
                         + (vel * delta_v) / (2 * self.sqrtab)
         s_star = max(s_star_raw, self.s0)
@@ -120,9 +119,9 @@ class IDMAuto(IDM):
         '''
         Define the special following behavior between autonomous cars
         '''
-        if (isinstance(fwd.model(), IDMAuto) and isinstance(fwd, Car)):
-            v1, v2 = bwd.velocity(), fwd.velocity()
-            pos1, pos2 = bwd.position(), fwd.position()
+        if (isinstance(fwd.model, IDMAuto)):
+            v1, v2 = bwd.vel, fwd.vel
+            pos1, pos2 = bwd.pos, fwd.pos
             # The fwd's acceleration must be already clear
             # use one pass calcAcc then do the real acceleration
             # "lock" the autonomous vehicles
