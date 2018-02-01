@@ -56,7 +56,6 @@ class Car(implements(Moveable)):
             return self.model.calc_acc(self, fwd)
 
     def distance_to(self, fwd):
-        assert isinstance(fwd, Moveable)
         return fwd.pos - self.pos - self.length
 
     def change(self, f_old, b_old, f_new, b_new):
@@ -88,7 +87,7 @@ class BCCar(implements(Moveable)):
     '''
 
     def __init__(self, x, v, lane, model, length=0):
-        self.pos, self.v, self.lane, self.model, self.length = \
+        self.pos, self.vel, self.lane, self.model, self.length = \
             x, v, lane, model, length
 
     @property
@@ -135,6 +134,14 @@ class Obstcle(implements(Moveable)):
         self.pos, self.lane, self.length = x, lane, length
         self.vel = 0
         self.model = MicroModelOb()
+
+    @property
+    def lane_change(self):
+        return None
+
+    @lane_change.setter
+    def lane_change(self, lanechange):
+        pass
 
     def time_to_change(self, dt):
         return False

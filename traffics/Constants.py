@@ -2,6 +2,14 @@
 '''
 Store list of constants
 '''
+# minimum insertion gap
+INSERT_GAP = 20
+
+# boundary car distance
+BOUNDARY_DISTANCE = 200
+
+# update time interval
+TIME_STEP = 0.5
 
 # s* function
 DELTA = 4.0
@@ -12,6 +20,7 @@ LEN_TRUCK = 5
 
 ############LaneChange parameters#####################
 # safety
+MAIN_BSAVE = 6.
 MAIN_BSAVE_CAR = 9. # max deceleration
 MAIN_BSAVE_TRUCK = 8.
 MAIN_SMIN = 2. # gap for change lane

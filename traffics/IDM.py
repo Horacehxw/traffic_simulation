@@ -99,11 +99,11 @@ class IDM():
         delta_v = bwd.vel - fwd.vel
         s = bwd.distance_to(fwd)
         vel = bwd.vel
-        s_star_raw = self.s0 + self.s1 * np.sqrt(vel / self.v0) + vel * self.T\
+        s_star_raw = self.s0 + vel * self.T\
                         + (vel * delta_v) / (2 * self.sqrtab)
         s_star = max(s_star_raw, self.s0)
         acc = self.a * (1 - np.power(vel / self.v0, self.delta) - (s_star **2) / (s**2))
-        acc = max(acc, -MAX_BRAKING)
+        acc = max(acc, -MAIN_BSAVE)
         return acc
 
     def get_v0(self):

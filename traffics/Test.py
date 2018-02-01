@@ -5,6 +5,7 @@ from LaneChange import LaneChange
 from Cars import *
 from copy import copy, deepcopy
 from CarFactory import *
+from Street import *
 
 class MyTestCase(unittest.TestCase):
 
@@ -33,6 +34,13 @@ class MyTestCase(unittest.TestCase):
     def test_CarFactory(self):
         cf = CarFactory(0.5, 0.5)
         car = cf.create_vehicle(1,10,0)
+
+    def test_Street(self):
+        cf = CarFactory(0.5, 0.5)
+        road = Street(3, 1000, cf)
+        for i  in range(100):
+            road.update(2)
+
 
 
 if __name__ == '__main__':
