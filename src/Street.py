@@ -28,9 +28,11 @@ class Street():
                 num_lane, road_length, car_factory, dt
         self.street = [] # positions sorted in decreasing order
         # num of car need to add, already in/out in this update
+        self.time, self.flow_out_speed, self.flow_in_speed = 0, 0, 0
         self.vehicle_wait, self.vehicle_in, self.vehicle_out = 0, 0, 0
 
     def update(self, q_in):
+        self.time += self.dt
         #self.assertion() # debug
         self.insert_BC() # add boundary
         self.accelerate() # calculate new velocity
@@ -41,28 +43,43 @@ class Street():
         self.sort() # derease order of car.pos
 
         self.io_flow(q_in)
+        if self.time % 100 == 0:
+            self.calc_io_flow()
         # report current flow information
-        self.report()
 
     def report(self):
+        self.vehicle_in, self.vehicle_out = 0, 0
+
         vels = [car.vel for car in self.street]
         lane_count = np.zeros(self.num_lane)
         for car in self.street:
             lane_count[car.lane] += 1
-        flow_in_speed, flow_out_speed = self.vehicle_in/self.dt, \
-            self.vehicle_out/self.dt
+        print("-----------------------------------------------------------------")
+        print ("time = {:5.2f}".format(self.time))
         print("total vehicle: {:8}, average speed {:4.2f}, flow in {:3.2f} vehicle/s, flow out {:3.2f} vehicle/s"\
-              .format(len(self.street), np.average(vels), flow_in_speed, flow_out_speed))
+              .format(len(self.street), np.average(vels), self.flow_in_speed, self.flow_out_speed))
         print("\t min speed: {:4.2f}, max speed: {:4.2f}".format(np.min(vels), np.max(vels)))
         print("\t number of cars in each lane {}".format(lane_count))
-
+        print("-----------------------------------------------------------------")
 
 ###################DON'T CHANGE ANYTHING BELOW##########################################
+    def calc_io_flow(self):
+        self.flow_in_speed = self.vehicle_in / (self.dt * 100)
+        self.flow_out_speed = self.vehicle_out / (self.dt * 100)
+
+
     def assertion(self):
         '''
         only debug use: make sure the order is preserved
         :return:
         '''
+        for lane in range(self.num_lane):
+            idx = self.last_index_on_lane(lane)
+            next_id = self.next_index_on_lane(lane, idx)
+            while(idx != -1 and next_id != -1):
+                assert (self.street[idx].distance_to(self.street[next_id]) > 0)
+                idx = next_id
+                next_id = self.next_index_on_lane(lane, idx)
         for idx in range(1, len(self.street)):
             assert (self.street[idx-1].pos >= self.street[idx].pos)
 
@@ -194,11 +211,10 @@ class Street():
         origin = len(self.street)
         self.street = [car for car in self.street if car.pos < self.road_length]
 
-        self.vehicle_out = origin - len(self.street)
+        self.vehicle_out += origin - len(self.street)
 
         # in
         self.vehicle_wait += q_in * self.dt # add to waitlist
-        self.vehicle_in = 0
         lanes = np.arange(self.num_lane); shuffle(lanes)
         for lane in lanes:
             if self.vehicle_wait > 1:

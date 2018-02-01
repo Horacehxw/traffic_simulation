@@ -2,6 +2,10 @@
 '''
 Store list of constants
 '''
+# Probability of Auto/Car, Car/Truck
+PROB_AUTO = 0.5
+PROB_TRUCK = 0.5
+
 # minimum insertion gap
 INSERT_GAP = 20
 
@@ -23,7 +27,7 @@ LEN_TRUCK = 5
 MAIN_BSAVE = 6.
 MAIN_BSAVE_CAR = 9. # max deceleration
 MAIN_BSAVE_TRUCK = 8.
-MAIN_SMIN = 2. # gap for change lane
+MAIN_SMIN = 5. # gap for change lane
 
 # lane-change incentive
 BIAS_RIGHT_CAR = 0.1
@@ -60,4 +64,4 @@ A_INIT_TRUCK_MSII = 0.4
 
 # braking factor
 B_INIT_CAR_MSII = 3.0 # b in IDM parameter
-B_INIT_TRUCK_MSII = 4.0
+B_INIT_TRUCK_MSII = 2.0

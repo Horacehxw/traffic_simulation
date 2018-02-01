@@ -38,13 +38,10 @@ class MyTestCase(unittest.TestCase):
     def test_Street(self):
         cf = CarFactory(0.5, 0.5)
         road = Street(3, 10000, cf)
-        for _ in range(1000):
+        road.dt = 0.5
+        for _ in range(10000):
             road.update(10)
             road.assertion()
-
-
-
-
 
 if __name__ == '__main__':
     unittest.main()
