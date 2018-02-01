@@ -3,7 +3,8 @@ from Constants import *
 from CarFactory import *
 from LaneChange import *
 from IDM import *
-
+from numpy.random import shuffle
+import numpy as np
 
 
 
@@ -30,6 +31,7 @@ class Street():
         self.vehicle_wait, self.vehicle_in, self.vehicle_out = 0, 0, 0
 
     def update(self, q_in):
+        #self.assertion() # debug
         self.insert_BC() # add boundary
         self.accelerate() # calculate new velocity
         self.change_lanes()
@@ -37,7 +39,33 @@ class Street():
 
         self.translate() # pos += vel * dt
         self.sort() # derease order of car.pos
+
         self.io_flow(q_in)
+        # report current flow information
+        self.report()
+
+    def report(self):
+        vels = [car.vel for car in self.street]
+        lane_count = np.zeros(self.num_lane)
+        for car in self.street:
+            lane_count[car.lane] += 1
+        flow_in_speed, flow_out_speed = self.vehicle_in/self.dt, \
+            self.vehicle_out/self.dt
+        print("total vehicle: {:8}, average speed {:4.2f}, flow in {:3.2f} vehicle/s, flow out {:3.2f} vehicle/s"\
+              .format(len(self.street), np.average(vels), flow_in_speed, flow_out_speed))
+        print("\t min speed: {:4.2f}, max speed: {:4.2f}".format(np.min(vels), np.max(vels)))
+        print("\t number of cars in each lane {}".format(lane_count))
+
+
+###################DON'T CHANGE ANYTHING BELOW##########################################
+    def assertion(self):
+        '''
+        only debug use: make sure the order is preserved
+        :return:
+        '''
+        for idx in range(1, len(self.street)):
+            assert (self.street[idx-1].pos >= self.street[idx].pos)
+
 
 
     def first_index_on_lane(self, lane):
@@ -102,9 +130,6 @@ class Street():
         for car in self.street:
             car.accelerate(self.dt)
 
-    def change_lanes(self):
-        pass
-
     def insert_BC(self):
         '''
         set boundary cars so that every one is defined
@@ -150,16 +175,14 @@ class Street():
                 if car.lane + 1 < self.num_lane:
                     new_lane.append(car.lane + 1) # right first
             for lane in new_lane:
-                f_old = self.next_index_on_lane(car.lane, idx)
-                b_old = self.prev_index_on_lane(car.lane, idx)
-                f_new = self.next_index_on_lane(lane, idx)
-                b_new = self.prev_index_on_lane(lane, idx)
+                f_old = self.street[self.next_index_on_lane(car.lane, idx)]
+                b_old = self.street[self.prev_index_on_lane(car.lane, idx)]
+                f_new = self.street[self.next_index_on_lane(lane, idx)]
+                b_new = self.street[self.prev_index_on_lane(lane, idx)]
                 if car.change(f_new=f_new, f_old=f_old, b_new=b_new, b_old=b_old):
                     self.street[idx].lane = lane
 
     def io_flow(self, q_in):
-        from numpy.random import shuffle
-        import numpy as np
         '''
         Handle the in and out flow of the street
         The flow-in car is assigned to each lane with equivalent probability.
@@ -169,11 +192,13 @@ class Street():
         '''
         # out
         origin = len(self.street)
-        self.street = [car for car in self.street if car.pos > self.road_length]
+        self.street = [car for car in self.street if car.pos < self.road_length]
+
         self.vehicle_out = origin - len(self.street)
 
         # in
         self.vehicle_wait += q_in * self.dt # add to waitlist
+        self.vehicle_in = 0
         lanes = np.arange(self.num_lane); shuffle(lanes)
         for lane in lanes:
             if self.vehicle_wait > 1:
@@ -185,9 +210,6 @@ class Street():
                     distance = self.street[idx_fwd].pos
 
                 if distance >= INSERT_GAP:
-                    self.street.insert(0,
-                                       self.carfatory.create_vehicle(0, distance, lane))
-
-
-
+                    self.street.append(self.carfatory.create_vehicle(0, distance, lane))
+                    self.vehicle_in += 1
 

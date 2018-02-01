@@ -37,9 +37,12 @@ class MyTestCase(unittest.TestCase):
 
     def test_Street(self):
         cf = CarFactory(0.5, 0.5)
-        road = Street(3, 1000, cf)
-        for i  in range(100):
-            road.update(2)
+        road = Street(3, 10000, cf)
+        for _ in range(1000):
+            road.update(10)
+            road.assertion()
+
+
 
 
 

@@ -55,7 +55,7 @@ class LaneChange():
         :return: bool
             change or not
         '''
-        assert isinstance(me, Moveable) and isinstance(f_new, Moveable)
+        #assert isinstance(me, Moveable) and isinstance(f_new, Moveable)
         # is 1 if new lane is on the right, else 0
         is_right = int(f_new.lane > me.lane)
         # check whether there's enough gap to change lane
