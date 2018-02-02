@@ -271,7 +271,8 @@ class StreetRamp(Street):
             if distance >= INSERT_GAP:
                 self.wait_ramp -= 1
                 car = self.carfatory.create_vehicle(0, distance, self.RAMP)
-                car.lane_change.bias_right = 3.
+                # TODO: restore this parameter after merge to main road.
+                car.lane_change.bias_right = 1. # they are more likely to turn to main road
                 self.street.append(car)
                 self.vehicle_in += 1
 
