@@ -35,11 +35,27 @@ class MyTestCase(unittest.TestCase):
         cf = CarFactory(0.5, 0.5)
         car = cf.create_vehicle(1,10,0)
 
+    def test_StreetRamp(self):
+        cf = CarFactory(0.5, 0.5)
+        road = StreetRamp(3, 10000, cf, 0.2)
+        for _ in range(100):
+            road.update(10)
+            road.report()
+            # road.assertion()
+
+    def test_StreetAuto(self):
+        road = StreetAuto(3, 10000, 0.2, 0.2)
+        for _ in range(100):
+            road.update(10)
+            road.report()
+            # road.assertion()
+
+    # TODO: there's a situation that human car's may crash with high probability
     def test_Street(self):
         cf = CarFactory(0.5, 0.5)
         road = Street(3, 10000, cf)
         road.dt = 0.5
-        for _ in range(10000):
+        for _ in range(100):
             road.update(10)
             road.assertion()
 

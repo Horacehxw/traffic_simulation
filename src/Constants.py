@@ -4,10 +4,10 @@ Store list of constants
 '''
 # Probability of Auto/Car, Car/Truck
 PROB_AUTO = 0.5
-PROB_TRUCK = 0.5
+PROB_TRUCK = 0.5 #Prob car actually
 
 # minimum insertion gap
-INSERT_GAP = 20
+INSERT_GAP = 10
 
 # boundary car distance
 BOUNDARY_DISTANCE = 200
@@ -22,17 +22,20 @@ DELTA = 4.0
 LEN_CAR = 3
 LEN_TRUCK = 5
 
+# highway speed limit
+SPEED_LIMIT_KMH = 96 #kmh
+
 ############LaneChange parameters#####################
 # safety
-MAIN_BSAVE = 6.
+MAIN_BSAVE = 6. #加速度最小是-6
 MAIN_BSAVE_CAR = 9. # max deceleration
 MAIN_BSAVE_TRUCK = 8.
 MAIN_SMIN = 5. # gap for change lane
 
 # lane-change incentive
-BIAS_RIGHT_CAR = 0.1
-BIAS_RIGHT_TRUCK = 0.3
-BIAS_RIGHT_AUTO = 0
+BIAS_RIGHT_CAR = 0.
+BIAS_RIGHT_TRUCK = 0.
+BIAS_RIGHT_AUTO = 0.
 
 P_FACTOR_CAR = 0.2 # Politeness
 P_FACTOR_TRUCK = 0.3
@@ -65,3 +68,5 @@ A_INIT_TRUCK_MSII = 0.4
 # braking factor
 B_INIT_CAR_MSII = 3.0 # b in IDM parameter
 B_INIT_TRUCK_MSII = 2.0
+
+

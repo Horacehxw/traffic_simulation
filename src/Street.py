@@ -56,13 +56,13 @@ class Street():
             lane_count[car.lane] += 1
         print("-----------------------------------------------------------------")
         print ("time = {:5.2f}".format(self.time))
-        print("total vehicle: {:8}, average speed {:4.2f}, flow in {:3.2f} vehicle/s, flow out {:3.2f} vehicle/s"\
+        print("total vehicle: {:4}, average speed {:4.2f}, flow in {:3.2f} vehicle/s, flow out {:3.2f} vehicle/s"\
               .format(len(self.street), np.average(vels), self.flow_in_speed, self.flow_out_speed))
-        print("\t min speed: {:4.2f}, max speed: {:4.2f}".format(np.min(vels), np.max(vels)))
-        print("\t number of cars in each lane {}".format(lane_count))
+        # print("\t min speed: {:4.2f}, max speed: {:4.2f}".format(np.min(vels), np.max(vels)))
+        print("\t num cars in each lane {}".format(lane_count))
         print("-----------------------------------------------------------------")
 
-###################DON'T CHANGE ANYTHING BELOW##########################################
+######################### Private Method Below ##########################################
     def calc_io_flow(self):
         self.flow_in_speed = self.vehicle_in / (self.dt * 100)
         self.flow_out_speed = self.vehicle_out / (self.dt * 100)
@@ -207,14 +207,13 @@ class Street():
 
         :param q_in: number of vehicle per second
         '''
-        # out
-        origin = len(self.street)
-        self.street = [car for car in self.street if car.pos < self.road_length]
+        self.o_flow()
+        self.i_flow(q_in)
 
-        self.vehicle_out += origin - len(self.street)
 
+    def i_flow(self, q_in):
         # in
-        self.vehicle_wait += q_in * self.dt # add to waitlist
+        self.vehicle_wait += q_in * self.dt  # add to waitlist
         lanes = np.arange(self.num_lane); shuffle(lanes)
         for lane in lanes:
             if self.vehicle_wait > 1:
@@ -229,3 +228,96 @@ class Street():
                     self.street.append(self.carfatory.create_vehicle(0, distance, lane))
                     self.vehicle_in += 1
 
+    def o_flow(self):
+        # out
+        origin = len(self.street)
+        self.street = [car for car in self.street if car.pos < self.road_length]
+        self.vehicle_out += origin - len(self.street)
+
+class StreetRamp(Street):
+    # TODO: use delegation instead of inheritance for more control on the strange bias_right factor
+    '''
+    Let lane 0 be the on ramp, where the road is closed from 1/3 of the roadlength.
+    '''
+    RAMP = 0
+    MERGE_POS = 0.33
+
+    def __init__(self, num_lane, road_length, car_factory, ramp_prob, dt = TIME_STEP):
+        '''
+        :param num_lane: this is main lane number, the on ramp is automatically added
+        :param road_length:
+        :param car_factory:
+        :param ramp_prob:
+        :param dt:
+        '''
+        assert(num_lane > 0)
+        super().__init__(num_lane+1, road_length, car_factory, TIME_STEP)
+        self.ramp_prob = ramp_prob
+        self.wait_main = 0
+        self.wait_ramp = 0
+        self.street.append(Obstacle(x=self.road_length * self.MERGE_POS, lane = self.RAMP, length = self.road_length * (1-self.MERGE_POS)))
+
+    def i_flow(self, q_in):
+        self.wait_main += q_in * (1-self.ramp_prob)
+        self.wait_ramp += q_in * self.ramp_prob
+
+        if self.wait_ramp > 1:
+            idx_fwd = self.last_index_on_lane(self.RAMP)
+            if idx_fwd == -1:
+                distance = self.road_length
+            else:
+                distance = self.street[idx_fwd].pos
+
+            if distance >= INSERT_GAP:
+                self.wait_ramp -= 1
+                car = self.carfatory.create_vehicle(0, distance, self.RAMP)
+                car.lane_change.bias_right = 3.
+                self.street.append(car)
+                self.vehicle_in += 1
+
+
+        lanes = np.arange(1, self.num_lane); shuffle(lanes)
+        for lane in lanes:
+            if self.wait_main > 1:
+                idx_fwd = self.last_index_on_lane(lane)
+                if idx_fwd == -1:
+                    distance = self.road_length
+                else:
+                    distance = self.street[idx_fwd].pos
+
+                if distance >= INSERT_GAP:
+                    self.wait_main -= 1
+                    self.street.append(self.carfatory.create_vehicle(0, distance, lane))
+                    self.vehicle_in += 1
+
+class StreetAuto():
+    '''
+    One lane exclusive use for autonomous cars.
+    '''
+
+    def __init__(self, num_lane, road_length, auto_prob, ramp_prob, car_prob = 0.8, dt = TIME_STEP, num_auto = 1):
+        assert(num_lane > num_auto)
+        car_factory_auto = CarFactory(1, car_prob)
+        car_factory_human = CarFactory(0, car_prob)
+        self.main_road = StreetRamp(num_lane-num_auto, road_length, car_factory_human, ramp_prob, dt)
+        self.auto_road = StreetRamp(num_auto, road_length, car_factory_auto, ramp_prob, dt)
+        self.auto_prob = auto_prob
+
+    def update(self, q_in):
+        self.main_road.update(q_in * (1 - self.auto_prob))
+        self.auto_road.update(q_in * self.auto_prob)
+
+    def report(self):
+        self.auto_road.vehicle_in, self.auto_road.vehicle_out = 0, 0
+        self.main_road.vehicle_in, self.main_road.vehicle_out = 0, 0
+
+        avg1 = np.sum([car.vel for car in self.main_road.street])
+        avg2 = np.sum([car.vel for car in self.auto_road.street])
+        avg = (avg1 + avg2)/(1+len(self.main_road.street) + len(self.auto_road.street))
+        print("-----------------------------------------------------------------")
+        print("time = {:5.2f}".format(self.main_road.time))
+        print("total vehicle: {:4}, average speed {:4.2f}" \
+              .format(len(self.main_road.street) + len(self.auto_road.street), avg))
+        # print("\t min speed: {:4.2f}, max speed: {:4.2f}".format(np.min(vels), np.max(vels)))
+        #print("\t num cars in each lane {}".format(lane_count))
+        print("-----------------------------------------------------------------")

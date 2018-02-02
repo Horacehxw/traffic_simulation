@@ -59,6 +59,7 @@ class CarFactory():
                                                    bsave=MAIN_BSAVE_TRUCK,
                                                    bias_right=BIAS_RIGHT_AUTO)
 
+
     def create_vehicle(self, position, initial_gap, lane):
         # car_prob and auto_prob are independent Probability
         if rand() < self.auto_prob:

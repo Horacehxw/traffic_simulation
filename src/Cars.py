@@ -23,6 +23,17 @@ class Car(implements(Moveable)):
         return Car(self.pos, self.vel, self.lane, self.model, self.lane_change, \
                    self.length)
 
+    @property
+    def vel(self):
+        return self.__vel
+
+    @vel.setter
+    def vel(self, v):
+        if v > SPEED_LIMIT_KMH / 3.6:
+            self.__vel = SPEED_LIMIT_KMH / 3.6
+        else:
+            self.__vel = v
+
     def time_to_change(self, dt):
         '''
         Count the wait time to check whether to change lane or not.
@@ -117,7 +128,7 @@ class BCCar(implements(Moveable)):
         pass
 
 
-class Obstcle(implements(Moveable)):
+class Obstacle(implements(Moveable)):
     '''
     model necessary since obstacle=type "Moveable" and lane change checks
     acceleration! influences 3 following locations labeld with xxx
